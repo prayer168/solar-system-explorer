@@ -15,7 +15,7 @@
 🎧 有自動導覽＋語音解說
 📱 手機、平板、投影都能用，免安裝
 
-👉 https://prayer168.github.io/solar-system-explorer/
+👉 https://tinyurl.com/24564tte
 
 小考題：哪顆行星的一天比一年還長？🤔
 答案在網站裡，快去找找看！🐻
@@ -25,4 +25,4 @@
 ## 版本 B：更短（LINE VOOM／一句話轉傳）
 
 🪐 免費 3D 太陽系＋銀河系互動網站，點開就能帶孩子去太空旅行！🚀
-👉 https://prayer168.github.io/solar-system-explorer/
+👉 https://tinyurl.com/24564tte
