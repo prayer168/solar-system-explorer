@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>太陽系探險家</title>
+<meta name="description" content="給小朋友的 3D 互動太陽系與銀河系教材：認識八大行星的特色、大小、距離、內部構造，並從地球一路縮小到本星系群。">
+<meta name="theme-color" content="#050816">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<canvas id="dist-canvas" class="hidden"></canvas>
+<div id="labels"></div>
+
+<!-- 載入畫面 -->
+<div id="loader">
+  <div class="loader-orbit"><span></span></div>
+  <h1>太陽系探險家</h1>
+  <p id="loader-text">正在準備星球… 0%</p>
+</div>
+
+<!-- 上方列 -->
+<header id="topbar">
+  <div class="brand">
+    <div class="logo" aria-hidden="true"></div>
+    <div><b>太陽系探險家</b><small>Solar System Explorer</small></div>
+  </div>
+  <nav id="modes" role="tablist" aria-label="模式">
+    <button data-mode="overview" class="on" role="tab"><i>🪐</i><span>太陽系</span></button>
+    <button data-mode="size" role="tab"><i>⚖️</i><span>比大小</span></button>
+    <button data-mode="distance" role="tab"><i>📏</i><span>比距離</span></button>
+    <button data-mode="galaxy" role="tab"><i>🌌</i><span>銀河系</span></button>
+  </nav>
+  <div class="tools">
+    <button id="btn-tour" class="pill accent" title="自動導覽"><span class="ico">▶</span><span class="txt">自動導覽</span></button>
+    <button id="btn-voice" class="icon" title="語音旁白（導覽時朗讀）" aria-pressed="true">🔊</button>
+    <button id="btn-full" class="icon" title="全螢幕">⛶</button>
+    <button id="btn-about" class="icon" title="關於與授權">ⓘ</button>
+  </div>
+</header>
+
+<!-- 圖層與時間（總覽模式） -->
+<div id="timebar" class="glass">
+  <button id="btn-play" class="icon" title="暫停／播放">⏸</button>
+  <div class="time-info">
+    <b id="sim-date">2026 年 11 月 18 日</b>
+    <label class="speed"><span>速度</span><input id="speed" type="range" min="0" max="100" value="45"><em id="speed-label">1 天/秒</em></label>
+  </div>
+  <div class="toggles">
+    <button data-toggle="orbits" class="chip on">軌道</button>
+    <button data-toggle="labels" class="chip on">名稱</button>
+    <button data-toggle="belts" class="chip on">小行星帶</button>
+    <button data-toggle="zones" class="chip">分類</button>
+  </div>
+</div>
+
+<!-- 分類圖例 -->
+<div id="legend" class="glass hidden">
+  <span><i style="background:#ffb547"></i>恆星</span>
+  <span><i style="background:#e0a070"></i>類地行星（岩石）</span>
+  <span><i style="background:#f0c890"></i>氣體巨行星</span>
+  <span><i style="background:#7fd8f0"></i>冰巨行星</span>
+  <span><i style="background:#c9a8ff"></i>矮行星</span>
+</div>
+
+<!-- 比大小資訊 -->
+<div id="size-panel" class="glass hidden">
+  <h3>真實比例比大小</h3>
+  <p id="size-text">點一顆星球，看看它跟地球比起來有多大。</p>
+  <div class="row">
+    <button id="size-all" class="chip on">看全部</button>
+    <button id="size-sun" class="chip">加入太陽</button>
+  </div>
+</div>
+
+<!-- 比距離面板 -->
+<div id="dist-panel" class="glass hidden">
+  <div class="row">
+    <h3>太陽系有多大？</h3>
+    <div class="seg">
+      <button data-scale="real" class="on">真實距離</button>
+      <button data-scale="log">壓縮顯示</button>
+    </div>
+  </div>
+  <div class="row">
+    <button id="btn-photon" class="pill accent">☀️ 發射一道光</button>
+    <div class="seg" id="light-speed">
+      <button data-ls="1">真實光速</button>
+      <button data-ls="100">×100</button>
+      <button data-ls="600" class="on">×600</button>
+      <button data-ls="3000">×3000</button>
+    </div>
+    <span id="photon-clock">光走了 0 秒</span>
+  </div>
+  <div id="dist-card"></div>
+</div>
+
+<!-- 銀河模式 -->
+<div id="galaxy-panel" class="glass hidden">
+  <div class="g-head">
+    <span id="g-scale" class="scale-chip">約 3 光年</span>
+    <h3 id="g-title">太陽系與奧爾特雲</h3>
+  </div>
+  <p id="g-text"></p>
+  <div class="g-nav">
+    <button id="g-prev" class="pill">🔍 放大</button>
+    <div id="g-dots"></div>
+    <button id="g-next" class="pill accent">縮小 🔭</button>
+  </div>
+</div>
+
+<!-- 星球選單 -->
+<nav id="dock" aria-label="選擇星球"></nav>
+
+<!-- 星球資訊卡 -->
+<aside id="panel" class="glass" aria-live="polite">
+  <button id="panel-close" class="icon close" title="關閉">✕</button>
+  <div class="p-head">
+    <div id="p-ball" class="ball"></div>
+    <div>
+      <span id="p-type" class="type-chip"></span>
+      <h2 id="p-name"></h2>
+      <small id="p-en"></small>
+    </div>
+  </div>
+  <div class="tabs" role="tablist">
+    <button data-tab="intro" class="on">認識</button>
+    <button data-tab="inside">構造</button>
+    <button data-tab="compare">比一比</button>
+    <button data-tab="facts">冷知識</button>
+    <button data-tab="missions">探測</button>
+  </div>
+  <div id="p-body"></div>
+  <div class="p-foot">
+    <button id="p-prev" class="pill">← 上一顆</button>
+    <button id="p-next" class="pill">下一顆 →</button>
+  </div>
+</aside>
+
+<!-- 導覽字幕 -->
+<div id="caption" class="hidden">
+  <div id="caption-text"></div>
+  <div class="cap-ctrl">
+    <div id="caption-bar"><span></span></div>
+    <button id="cap-prev" class="icon" title="上一段">⏮</button>
+    <button id="cap-pause" class="icon" title="暫停">⏸</button>
+    <button id="cap-next" class="icon" title="下一段">⏭</button>
+    <button id="cap-stop" class="icon" title="結束導覽">✕</button>
+  </div>
+</div>
+
+<div id="hint" class="hidden">拖曳旋轉 · 滾輪或雙指縮放 · 點星球看介紹</div>
+
+<!-- 關於 -->
+<dialog id="about">
+  <h2>關於「太陽系探險家」</h2>
+  <p>一個給小朋友的 3D 互動太陽系與銀河系教材。可以旋轉、縮放、點選每顆星球，也可以按「自動導覽」上課投影使用。</p>
+  <h3>操作方式</h3>
+  <ul>
+    <li>滑鼠拖曳／單指滑動：旋轉視角；滾輪／雙指：縮放</li>
+    <li>點星球或下方圓圈：飛過去看介紹</li>
+    <li>鍵盤：← → 切換星球、空白鍵暫停、Esc 關閉</li>
+  </ul>
+  <h3>資料與授權</h3>
+  <ul>
+    <li>星球貼圖：<a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener">Solar System Scope</a>，以 <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> 授權（依據 NASA 資料製作）。</li>
+    <li>星球數據：NASA Planetary Fact Sheet、NASA Science。數字經四捨五入；衛星數量會隨新發現增加。</li>
+    <li>冥王星貼圖為程式繪製的示意圖。</li>
+    <li>3D 引擎：<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a>（MIT）。</li>
+  </ul>
+  <p class="note">總覽模式中的大小與距離經過壓縮，方便一次看到全部；真實比例請看「比大小」和「比距離」。</p>
+  <form method="dialog"><button class="pill accent">知道了</button></form>
+</dialog>
+
+<script type="module" src="js/main.js"></script>
+<script>
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+</script>
+</body>
+</html>
