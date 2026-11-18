@@ -1,6 +1,10 @@
 # 🪐 太陽系探險家 Solar System Explorer
 
-給國小學生的 3D 互動太陽系與銀河系教材。全螢幕、單頁、不捲動，電腦、平板、手機都能用，也可以投影上課。
+給國小學生的 3D 互動太陽系與銀河系教材。
+
+🔗 **線上版（GitHub Pages）：https://prayer168.github.io/solar-system-explorer/**
+
+全螢幕、單頁、不捲動，電腦、平板、手機都能用，也可以投影上課。
 
 ## 功能
 
@@ -43,7 +47,12 @@ python -m http.server 8123
 # 開啟 http://localhost:8123
 ```
 
-## 部署（Vercel）
+## 部署
+
+### GitHub Pages（已啟用）
+Settings → Pages：來源是 `main` 分支的根目錄 `/`。repo 裡有 `.nojekyll`，GitHub 會直接提供靜態檔。只要 push，約一分鐘後就會更新。
+
+### Vercel
 
 在 Vercel 用 **Import Git Repository** 選擇本 repo，設定如下：
 - Framework Preset：**Other**

@@ -112,6 +112,17 @@ gh repo create solar-system-explorer --public --source . --push
 2. Framework Preset 選 **Other**，Build Command 留空，Output Directory 填 `.`
 3. 按 Deploy。之後只要 push 到 main，就會自動重新部署
 
+### GitHub Pages（2026-11-18）
+
+```bash
+touch .nojekyll        # 不讓 Jekyll 處理，直接提供靜態檔
+gh api -X POST repos/prayer168/solar-system-explorer/pages -f "source[branch]=main" -f "source[path]=/"
+```
+
+- 網址：https://prayer168.github.io/solar-system-explorer/
+- 網站放在子路徑 `/solar-system-explorer/` 底下，因為所有路徑都是相對路徑（`js/…`、`assets/…`、`sw.js`），所以不需要修改
+- 檢查結果：首頁、程式、貼圖、manifest、sw.js 都回傳 200，瀏覽器顯示正常，主控台沒有錯誤
+
 ## 12. 日後可以做的事
 
 - 用 Capacitor 或 TWA 包成 Android／iOS App（PWA 已具備基礎）
